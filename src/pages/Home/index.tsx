@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styles from './styles.module.css';
-import findNumberPrime from '../../utils/findNthNumber';
 
 function Home() {
   const [number, setNumber] = useState<number>(0);
@@ -13,9 +12,13 @@ function Home() {
 
   const onClick = () => {
     const start = performance.now();
-    const nthPrime = findNumberPrime(number);
+    const worker = new Worker(new URL('../../workers/nth-worker.ts', import.meta.url), { type: 'module' });
+    worker.postMessage(number);
+    worker.onmessage = (event) => {
+      setNthPrime(event.data);
+      worker.terminate();
+    };
     const end = performance.now();
-    setNthPrime(nthPrime)
     setUIBlock(end - start)
   }
 
